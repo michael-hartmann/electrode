@@ -399,6 +399,7 @@ class Polygons(list):
                     poly = poly.intersection(field)
                 xy = np.array(poly.exterior.coords.xy).copy()
                 xy = xy.T[:, :2]*scale/phys_unit
+                xy = (np.rint(xy)).astype(int)
                 if text_layer is not None and name:
                     p = elements.Text(layer=text_layer[0],
                                       text_type=text_layer[1], xy=xy[:1],
@@ -418,7 +419,7 @@ class Polygons(list):
                 xy = np.array(loop.coords.xy).copy()
                 xy = xy.T[:, :2]*scale/phys_unit
                 #xy = np.r_[xy, xy[:1]]
-                xy = np.array(xy, dtype=int)
+                xy = (np.rint(xy)).astype(int)
                 p = elements.Path(layer=gap_layer[0],
                                   data_type=gap_layer[1], xy=xy)
                 p.width = int(gap_width*scale/phys_unit)
