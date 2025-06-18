@@ -98,6 +98,7 @@ class Polygons(list):
         obj = cls()
         for e in system:
             if not hasattr(e, "paths"):
+                print("INFO: no paths, continue..")
                 continue
             # assert isinstance(e, PolygonPixelElectrode), (e, e.name)
             exts, ints = [], []
@@ -368,6 +369,13 @@ class Polygons(list):
         Library
             `gdsii.library.Library` with one Structure/Cell named `name`
             containing the given data.
+
+        Notes:
+        ------
+        In case there is an error "required argument is not an int"
+        you need to convert the the paramters to an integer before packing
+        (Esentially they are already integers, but are not declared as such).
+        This can be done in the corresponding file of the "struct" package.
         """
         lib = library.Library(version=5, name=name.encode("ascii"),
                               physical_unit=phys_unit, logical_unit=1e-3)
@@ -376,7 +384,6 @@ class Polygons(list):
         if edge:
             field = geometry.Polygon([[edge/2, edge/2], [-edge/2, edge/2],
                                       [-edge/2, -edge/2], [edge/2, -edge/2]])
-        #stru.append(elements.Node(layer=layer, node_type=0, xy=[(0, 0)]))
         gaps = []
         for name, polys in self:
             props = {}
@@ -406,23 +413,12 @@ class Polygons(list):
                 gaps.append(poly.exterior)
                 gaps.extend(poly.interiors)
         if gap_layer is not None:
-            ##g = ops.cascaded_union(gaps) # segfaults
-            #g = ops.unary_union(gaps)
-            #g = geometry.MultiLineString(gaps)
             g = gaps
-            # this breaks it up badly
-            #g = geometry.LineString()
-            #for i in gaps:
-            #    g = g.union(i)
-            #if edge:
-            #    g = g.intersection(field)
-            #    g = g.difference(field.boundary)
-            #if not hasattr(g, "geoms"):
-            #    g = [g]
             for loop in g:
                 xy = np.array(loop.coords.xy).copy()
                 xy = xy.T[:, :2]*scale/phys_unit
                 #xy = np.r_[xy, xy[:1]]
+                xy = np.array(xy, dtype=int)
                 p = elements.Path(layer=gap_layer[0],
                                   data_type=gap_layer[1], xy=xy)
                 p.width = int(gap_width*scale/phys_unit)

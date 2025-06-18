@@ -388,15 +388,18 @@ class System(list):
         if cmap is None:
             import matplotlib.pyplot as plt
             cmap = plt.cm.RdBu_r
+            
         if u is None:
             u = self.dcs
+        label_voltages = np.copy(u)
         if um is None:
             um = np.fabs(u).max() or 1.
         u = (u / um + 1)/2
         #colors = np.clip((u+.5, .5-np.fabs(u), -u+.5), 0, 1).T
         colors = [cmap(ui) for ui in u]
-        for el, ci in zip(self, colors):
-            el.plot(ax, color=ci, **kwargs)
+        for el, ci, vi in zip(self, colors, label_voltages):
+            el.plot(ax, color=ci, label="{:.1f}".format(vi), **kwargs)
+
 
     def minimum(self, x0, axis=(0, 1, 2), coord=np.identity(3),
         method="Newton-CG", **kwargs):
