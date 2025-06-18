@@ -568,7 +568,7 @@ def mathieu(r, *a):
       (see numpy.linalg.eig())
     """
     n = a[0].shape[0]
-    m = np.zeros((2*r+1, 2*r+1, 2, 2, n, n), dtype=np.complex)
+    m = np.zeros((2*r+1, 2*r+1, 2, 2, n, n), dtype=complex)
     for l in range(2*r+1):
         # derivative on the diagonal
         m[l, l, 0, 0] = m[l, l, 1, 1] = np.identity(n)*2j*(l-r)

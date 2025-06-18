@@ -1,0 +1,8 @@
+cython
+matplotlib
+numpy
+scipy
+traits
+shapely
+setuptools
+python-gdsii
