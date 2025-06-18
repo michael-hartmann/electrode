@@ -275,11 +275,12 @@ class PolygonPixelElectrode(SurfaceElectrode):
     SurfaceElectrode
         `cover_nmax` and `cover_height` attributes/constructor parameters
     """
-    __slots__ = "paths".split()
+    __slots__ = "paths up".split()
 
-    def __init__(self, paths=[], **kwargs):
+    def __init__(self, paths=[], up=False, **kwargs):
         super(PolygonPixelElectrode, self).__init__(**kwargs)
         self.paths = [np.asanyarray(i, np.double) for i in paths]
+        self.up = up
 
     def orientations(self):
         return np.sign([area_centroid(pi)[0] for pi in self.paths])
@@ -323,7 +324,11 @@ class PolygonPixelElectrode(SurfaceElectrode):
         return e
 
     def potential(self, x, derivative=0, potential=1., out=None):
-        return polygon_potential(x, self.paths, potential, derivative,
+        if self.up:
+            return polygon_potential(x-np.array([[0,0,self.cover_height]]*len(x)), self.paths, -potential, derivative,
+                self.cover_nmax, self.cover_height, out)
+        else:
+            return polygon_potential(x, self.paths, potential, derivative,
                 self.cover_nmax, self.cover_height, out)
 
 
