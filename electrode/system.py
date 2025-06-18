@@ -342,7 +342,7 @@ class System(list):
         rf = self.pseudo_potential(x, derivative)
         return dc + rf
 
-    def plot(self, ax, alpha=.3, **kwargs):
+    def plot(self, ax, alpha=.3, up=None, **kwargs):
         """Plot electrodes projected onto the xy plane.
         
         Plots each electrode according to its interpretation of `plot()`
@@ -355,7 +355,16 @@ class System(list):
             Passed to all `Electrode.plot()`.
         """
         for e, c in zip(self, itertools.cycle(colors.set3)):
-            e.plot(ax, color=tuple(c/255.), alpha=alpha, **kwargs)
+            if up != True and up != False:
+                e.plot(ax, color=tuple(c/255.), alpha=alpha, **kwargs)
+            elif hasattr(e, 'up'):
+                if e.up == False and up == False:
+                    e.plot(ax, color=tuple(c/255.), alpha=alpha, **kwargs)
+                elif e.up == True and up==True:
+                    e.plot(ax, color=tuple(c/255.), alpha=alpha, **kwargs)
+            else:
+                if up == False:
+                    e.plot(ax, color=tuple(c/255.), alpha=alpha, **kwargs)
 
     def plot_voltages(self, ax, u=None, um=None, cmap=None,
             **kwargs):
