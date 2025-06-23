@@ -1,0 +1,52 @@
+FROM jupyter/base-notebook
+
+LABEL maintainer="Klemens Schueppert <klemens.schueppert@infineon.com>"
+
+# Fix: https://github.com/hadolint/hadolint/wiki/DL4006
+# Fix: https://github.com/koalaman/shellcheck/wiki/SC3014
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+USER root
+
+# Install all OS dependencies for fully functional notebook server
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    # Common useful utilities
+    git \
+    nano-tiny \
+    tzdata \
+    unzip \
+    vim-tiny \
+    # git-over-ssh
+    openssh-client \
+    # less is needed to run help in R
+    # see: https://github.com/jupyter/docker-stacks/issues/1588
+    less \
+    # Enable clipboard on Linux host systems
+    xclip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Python 3 packages
+RUN mamba install --yes \
+    # electrodes dependencies
+    'numpy' \
+    'scipy' \
+    'pandas' \
+    'matplotlib-base' \
+    'cvxopt' \
+    'traits' \
+    'shapely' 
+
+RUN git clone https://gitlab.intra.infineon.com/tiqc/simulations/ion-traps/electrode-package/electrode.git &&\
+    ln -s "/home/jovyan/electrode/electrode" "/opt/conda/lib/python3.11/site-packages/electrode" &&\
+    git clone https://gitlab.intra.infineon.com/tiqc/simulations/ion-traps/electrode-package/simulations-helpers.git &&\
+    ln -s "/home/jovyan/simulations-helpers" "/opt/conda/lib/python3.11/site-packages/simhelp"
+
+# Create alternative for nano -> nano-tiny
+RUN update-alternatives --install /usr/bin/nano nano /bin/nano-tiny 10
+
+# Switch back to jovyan to avoid accidental container runs as root
+USER ${NB_UID}
+
+# Add R mimetype option to specify how the plot returns from R to the browser
+#COPY --chown=${NB_UID}:${NB_GID} Rprofile.site /opt/conda/lib/R/etc/
